@@ -13,18 +13,14 @@ void insert(List *list, Object x){
 	new = (Pointer)malloc(sizeof(Pointer));
 	new->element = x;
 
-	// if(search(list, x.key)){
-	// 	printf("Objeto já listado\n");
-	// }
-
 	if(isEmpty(list)){
 		list->first = new;
 		list->last = new;
 		new->prev = NULL;
-		list->size++;
+		list->size++; // increase the size
 		printf("## Object {%i} inserted in the 1st pos\n", new->element.key);
 	} else {
-		if(search(list, x.key)){
+		if(search(list, x.key)){ // verify if there isnt another object with the same value
 			printf("## Object {%i} is already listed\n", x.key);
 		} else {
 			Pointer aux = list->first;
@@ -33,14 +29,14 @@ void insert(List *list, Object x){
 				aux->next = new;
 				new->prev = aux;
 				list->last = new;
-				list->size++;
+				list->size++; // increase the size
 				printf("## Object {%i} inserted in the last position\n", new->element.key);
 			} else if(list->first->element.key > x.key){
 				new->next = aux;
 				new->prev = aux->prev;
 				aux->prev = new;
 				list->first = new;
-				list->size++;
+				list->size++; // increase the size
 				printf("## Object {%i} inserted in the 1st pos and pushed object {%i} to 2nd pos\n", new->element.key, list->first->next->element.key);
 			} else {
 				while(aux->next != NULL && x.key > aux->next->element.key){
@@ -118,11 +114,12 @@ bool search(List *list, int key){
 // }
 
 int size(List *list){
-	return list->size;
+	return list->size; // returns size of the list
 }
 
 void removeElement(List *list, int key, Object *item){
 	if(isEmpty(list) || list->first->element.key > key){
+		// if the list is empty or first object is bigger than the passed key, the key isnt listed
 		item = NULL;
 		printf("## The List is Empty or the object isnt listed!!\n");
 	} else {
@@ -140,7 +137,7 @@ void removeElement(List *list, int key, Object *item){
 						*item = remove->element;
 						list->size = list->size-1;
 						printf("Removed object {%i}, resting %i elements", remove->element.key, list->size);
-						free(remove);
+						free(remove); // free memory of aux remove
 					}
 			} else {
 				printf("## Object isn't listed\n");
@@ -153,11 +150,9 @@ void removeFirst(List *list, Object *item){
 	Pointer aux = list->first; // makes a pointer to point to the first object of the list
 	*item = aux->element;	// make the object passed by parameter receive the element of aux pointer
 	list->first = aux->next;	// make the first object receive next object of aux pointer
-	list->size--;
-
+	list->size--; // reduce the list size
 	printf("## Removed 1st object with value { %i }\n", aux->element.key);
-
-	free(aux);
+	free(aux); // free memory
 }
 
 void removeLast(List *list, Object *item){
@@ -165,30 +160,27 @@ void removeLast(List *list, Object *item){
 	Pointer remove = list->last;
 	*item = remove->element;
 	printf("## Removed last object with value { %i }\n", (*item).key);
-	aux->next = NULL;
-	list->last = aux;
-	free(remove);
-	list->size--;
+	aux->next = NULL; // make aux pointer next receive null
+	list->last = aux; // make list last receive the aux pointer
+	free(remove); // free memory
+	list->size--; // reduce the list size
 }
 
 Object first(List *list){
-	return list->first->element;
+	return list->first->element; // return the first listed object
 }
 
 Object last(List *list){
-	Pointer aux = list->first;
-	while(aux->next != NULL){
-		aux = aux->next;
-	}
-	return aux->element;
+	return list->last->element; // return the last listed object
 }
 
-bool write(FILE *arq, List *list, char mode){
+bool write(FILE *arq, List *list, char mode){ // write the list into the file according to the modus operand
 	if(mode == 'd' || mode == 'D'){
 		Pointer aux;
 		fprintf(arq, "Tamanho = %i\n", size(list));
 		fprintf(arq, "Lista = { ");
 		for(aux = list->last; aux->prev != NULL; aux = aux->prev){
+			// make a aux pointer receive the last object of the list and writes it in the file
 			fprintf(arq, "%i ", aux->element.key);
 		}
 		fprintf(arq, "%i }\n", aux->element.key);
@@ -198,6 +190,7 @@ bool write(FILE *arq, List *list, char mode){
 		fprintf(arq, "Tamanho = %i\n", size(list));
 		fprintf(arq, "Lista = { ");
 		for(aux = list->first; aux->next != NULL; aux = aux->next){
+			// make a aux pointer receive the first object of the list and writes it in the file
 			fprintf(arq, "%i ", aux->element.key);
 		}
 		fprintf(arq, "%i }\n", aux->element.key);
@@ -212,7 +205,7 @@ int main(int argc, char *argv[2]) {
 	Object ob;
 	Object item;
 
-	if(argc < 3){
+	if(argc < 3){ // veirify if the user included the input file and output file name as parameters
 		printf("## Error obtaining files names, please use ./PROGRAMNAME inputFileName.txt outputFileName.txt");
 	} else {
 		initList(&list);
@@ -227,7 +220,7 @@ int main(int argc, char *argv[2]) {
 			exit(1);
 		}
 
-		if(!fscanf(arqin,"%c", &mode) && (mode != 'd' || mode != 'c')){
+		if(!fscanf(arqin,"%c", &mode) && (mode != 'd' || mode != 'c')){ // verify if the user put a correct modus operand (C to crescent, D to decrescent)
 			printf("## Error obtainig modus operand");
 		} else {
 			while(!feof(arqin)){
